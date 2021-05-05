@@ -1,6 +1,8 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use ink_lang as ink;
+use ink_storage::collections::{Vec, HashMap, Stash, Bitvec};
+
 
 #[ink::contract]
 mod incrementer {
@@ -11,14 +13,28 @@ mod incrementer {
     #[ink(storage)]
     pub struct Incrementer {
         /// Stores a single `bool` value on the storage.
-        value: bool,
+        bool_value: bool,
+
+        // store a number
+        number: u32,
+
+        // store some AccountId
+        account_id: AccountId,
+
+        //store some Balance
+        balance: Balance,
     }
 
     impl Incrementer {
         /// Constructor that initializes the `bool` value to the given `init_value`.
         #[ink(constructor)]
-        pub fn new(init_value: bool) -> Self {
-            Self { value: init_value }
+        pub fn new(init_value: bool, init_number: u32, init_account: AccountId, init_balance: Balance) -> Self {
+            Self {
+                bool_value: init_value,
+                number: init_number,
+                account_id:  init_account,
+                balance: init_balance,
+             }
         }
 
         /// Constructor that initializes the `bool` value to `false`.
@@ -26,7 +42,7 @@ mod incrementer {
         /// Constructors can delegate to other constructors.
         #[ink(constructor)]
         pub fn default() -> Self {
-            Self::new(Default::default())
+            Self::new(Default::default(), Default::default(), Default::default(), Default::default())
         }
 
         /// A message that can be called on instantiated contracts.
@@ -34,13 +50,31 @@ mod incrementer {
         /// to `false` and vice versa.
         #[ink(message)]
         pub fn flip(&mut self) {
-            self.value = !self.value;
+            self.bool_value = !self.bool_value;
         }
 
         /// Simply returns the current value of our `bool`.
         #[ink(message)]
-        pub fn get(&self) -> bool {
-            self.value
+        pub fn get_bool(&self) -> bool {
+            self.bool_value
+        }
+
+        /// Simply returns the current value of our `number`.
+        #[ink(message)]
+        pub fn get_number(&self) -> u32 {
+            self.number
+        }
+
+        /// Simply returns the current value of our `account`.
+        #[ink(message)]
+        pub fn get_account(&self) -> AccountId {
+            self.account_id
+        }
+
+        /// Simply returns the current value of our `balance`.
+        #[ink(message)]
+        pub fn get_balance(&self) -> Balance {
+            self.balance
         }
     }
 
