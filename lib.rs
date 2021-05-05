@@ -65,6 +65,12 @@ mod incrementer {
             self.number
         }
 
+        /// Simply set the current value of our `number`.
+        #[ink(message)]
+        pub fn set_number(&mut self, new_value: u32) {
+            self.number = new_value;
+        }
+
         /// Simply returns the current value of our `account`.
         #[ink(message)]
         pub fn get_account(&self) -> AccountId {
@@ -104,5 +110,15 @@ mod incrementer {
             incrementer.flip();
             assert_eq!(incrementer.get_bool(), true);
         }
+
+        /// We test a simple use case of our contract.
+        #[ink::test]
+        fn number_test() {
+            let mut incrementer = Incrementer::new(false, 4, Default::default(), Default::default());
+            assert_eq!(incrementer.get_number(), 4);
+            incrementer.set_number(3);
+            assert_eq!(incrementer.get_number(), 3);
+        }
+
     }
 }
