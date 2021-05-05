@@ -93,16 +93,16 @@ mod incrementer {
         #[ink::test]
         fn default_works() {
             let incrementer = Incrementer::default();
-            assert_eq!(incrementer.get(), false);
+            assert_eq!(incrementer.get_bool(), false);
         }
 
         /// We test a simple use case of our contract.
         #[ink::test]
         fn it_works() {
-            let mut incrementer = Incrementer::new(false);
-            assert_eq!(incrementer.get(), false);
+            let mut incrementer = Incrementer::new(false, 4, Default::default(), Default::default());
+            assert_eq!(incrementer.get_bool(), false);
             incrementer.flip();
-            assert_eq!(incrementer.get(), true);
+            assert_eq!(incrementer.get_bool(), true);
         }
     }
 }
