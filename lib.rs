@@ -71,6 +71,12 @@ mod incrementer {
             self.number = new_value;
         }
 
+        /// Simply increment the current value of our `number`.
+        #[ink(message)]
+        pub fn inc(&mut self, by: u32) {
+            self.number += by;
+        }
+
         /// Simply returns the current value of our `account`.
         #[ink(message)]
         pub fn get_account(&self) -> AccountId {
@@ -118,6 +124,12 @@ mod incrementer {
             assert_eq!(incrementer.get_number(), 4);
             incrementer.set_number(3);
             assert_eq!(incrementer.get_number(), 3);
+            incrementer.inc(4);
+            assert_eq!(incrementer.get_number(), 7);
+            incrementer.inc(1);
+            assert_eq!(incrementer.get_number(), 8);
+            incrementer.inc(2);
+            assert_eq!(incrementer.get_number(), 10);
         }
 
     }
