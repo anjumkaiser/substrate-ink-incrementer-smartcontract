@@ -18,6 +18,10 @@ mod incrementer {
         // store a number
         number: u32,
 
+        // store a number using lazy
+        lazy_number: ink_storage::Lazy<u32>,
+
+
         // store some AccountId
         account_id: AccountId,
 
@@ -28,10 +32,11 @@ mod incrementer {
     impl Incrementer {
         /// Constructor that initializes the `bool` value to the given `init_value`.
         #[ink(constructor)]
-        pub fn new(init_value: bool, init_number: u32, init_account: AccountId, init_balance: Balance) -> Self {
+        pub fn new(init_value: bool, init_number: u32, init_lazy_number: u32, init_account: AccountId, init_balance: Balance) -> Self {
             Self {
                 bool_value: init_value,
                 number: init_number,
+                lazy_number: ink_storage::Lazy::<u32>::new(init_lazy_number), 
                 account_id:  init_account,
                 balance: init_balance,
              }
@@ -42,7 +47,7 @@ mod incrementer {
         /// Constructors can delegate to other constructors.
         #[ink(constructor)]
         pub fn default() -> Self {
-            Self::new(Default::default(), Default::default(), Default::default(), Default::default())
+            Self::new(Default::default(), Default::default(), Default::default(), Default::default(), Default::default())
         }
 
         /// A message that can be called on instantiated contracts.
@@ -75,6 +80,27 @@ mod incrementer {
         #[ink(message)]
         pub fn inc(&mut self, by: u32) {
             self.number += by;
+        }
+
+        /// Simply set the current value of our `number`.
+        #[ink(message)]
+        pub fn get_number_lazy (&mut self) -> u32 {
+            let x = ink_storage::Lazy::<u32>::get(&mut self.lazy_number);
+            x.clone()
+        }
+
+        /// Simply set the current value of our `number`.
+        #[ink(message)]
+        pub fn set_number_lazy (&mut self, new_value: u32) {
+            ink_storage::Lazy::<u32>::set(&mut self.lazy_number, new_value);
+        }
+
+        /// Simply increment the current value of our `number`.
+        #[ink(message)]
+        pub fn inc_lazy(&mut self, by: u32) {
+            let my_lazy_number = &mut self.lazy_number;
+            let cur = ink_storage::Lazy::<u32>::get(my_lazy_number);
+            ink_storage::Lazy::<u32>::set(my_lazy_number, cur + by);
         }
 
         /// Simply returns the current value of our `account`.
@@ -111,7 +137,7 @@ mod incrementer {
         /// We test a simple use case of our contract.
         #[ink::test]
         fn it_works() {
-            let mut incrementer = Incrementer::new(false, 4, Default::default(), Default::default());
+            let mut incrementer = Incrementer::new(false, 4, Default::default(), Default::default(), Default::default());
             assert_eq!(incrementer.get_bool(), false);
             incrementer.flip();
             assert_eq!(incrementer.get_bool(), true);
@@ -120,7 +146,7 @@ mod incrementer {
         /// We test a simple use case of our contract.
         #[ink::test]
         fn number_test() {
-            let mut incrementer = Incrementer::new(false, 4, Default::default(), Default::default());
+            let mut incrementer = Incrementer::new(false, 4, Default::default(), Default::default(), Default::default());
             assert_eq!(incrementer.get_number(), 4);
             incrementer.set_number(3);
             assert_eq!(incrementer.get_number(), 3);
@@ -130,6 +156,21 @@ mod incrementer {
             assert_eq!(incrementer.get_number(), 8);
             incrementer.inc(2);
             assert_eq!(incrementer.get_number(), 10);
+        }
+
+        /// We test a simple use case of our contract.
+        #[ink::test]
+        fn lazy_number_test() {
+            let mut incrementer = Incrementer::new(false, 4, 4, Default::default(), Default::default());
+            assert_eq!(incrementer.get_number_lazy(), 4);
+            incrementer.set_number_lazy(3);
+            assert_eq!(incrementer.get_number_lazy(), 3);
+            incrementer.inc_lazy(4);
+            assert_eq!(incrementer.get_number_lazy(), 7);
+            incrementer.inc_lazy(1);
+            assert_eq!(incrementer.get_number_lazy(), 8);
+            incrementer.inc_lazy(2);
+            assert_eq!(incrementer.get_number_lazy(), 10);
         }
 
     }
