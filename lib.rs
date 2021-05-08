@@ -22,8 +22,8 @@ mod incrementer {
         lazy_number: ink_storage::Lazy<u32>,
 
 
-        // store some AccountId
-        account_id: AccountId,
+        // store a mapping from AccountId to u32
+        account_number_map: ink_storage::collections::HashMap<AccountId, u32>,
 
         //store some Balance
         balance: Balance,
@@ -32,12 +32,14 @@ mod incrementer {
     impl Incrementer {
         /// Constructor that initializes the `bool` value to the given `init_value`.
         #[ink(constructor)]
-        pub fn new(init_value: bool, init_number: u32, init_lazy_number: u32, init_account: AccountId, init_balance: Balance) -> Self {
+        pub fn new(init_value: bool, init_number: u32, init_lazy_number: u32, init_balance: Balance) -> Self {
+            let init_account_number_map: ink_storage::collections::HashMap<AccountId, u32> = ink_storage::collections::HashMap::new();
+
             Self {
                 bool_value: init_value,
                 number: init_number,
                 lazy_number: ink_storage::Lazy::<u32>::new(init_lazy_number), 
-                account_id:  init_account,
+                account_number_map:  init_account_number_map,
                 balance: init_balance,
              }
         }
@@ -47,7 +49,8 @@ mod incrementer {
         /// Constructors can delegate to other constructors.
         #[ink(constructor)]
         pub fn default() -> Self {
-            Self::new(Default::default(), Default::default(), Default::default(), Default::default(), Default::default())
+
+            Self::new(Default::default(), Default::default(), Default::default(), Default::default())
         }
 
         /// A message that can be called on instantiated contracts.
@@ -103,10 +106,23 @@ mod incrementer {
             ink_storage::Lazy::<u32>::set(my_lazy_number, cur + by);
         }
 
-        /// Simply returns the current value of our `account`.
+        // Get value of a given AccountId
         #[ink(message)]
-        pub fn get_account(&self) -> AccountId {
-            self.account_id
+        pub fn get(&self, of: AccountId) -> u32 {
+            self.my_number_or_zero(&of)
+        }
+
+        // Get the value of calling AccountId
+        #[ink(message)]
+        pub fn get_my_number(&self) -> u32 {
+            let caller = self.env().caller();
+            self.my_number_or_zero(&caller)
+        }
+
+        // Returns the number for an AccountId or 0 if it is not set
+        fn my_number_or_zero(&self, of: &AccountId) -> u32 {
+            let value = self.account_number_map.get(of).unwrap_or(&0);
+            *value
         }
 
         /// Simply returns the current value of our `balance`.
