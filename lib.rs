@@ -142,6 +142,15 @@ mod incrementer {
             self.account_number_map.insert(caller, my_number + value);
         }
 
+        #[ink(message)]
+        pub fn upsert_my_number(&mut self, by: u32) {
+            let caller = self.env().caller();
+            self.account_number_map
+                .entry(caller)
+                .and_modify(|old_value| *old_value += by)
+                .or_insert(by);
+        }
+
         // Returns the number for an AccountId or 0 if it is not set
         fn my_number_or_zero(&self, of: &AccountId) -> u32 {
             let value = self.account_number_map.get(of).unwrap_or(&0);
