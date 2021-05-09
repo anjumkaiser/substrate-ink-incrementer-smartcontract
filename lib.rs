@@ -135,7 +135,7 @@ mod incrementer {
         }
 
         // Add a value to existing value for the calling AccountId
-        pub fn add_my_number(&mut self, value: u32) {
+        pub fn inc_my_number(&mut self, value: u32) {
             let caller = self.env().caller();
             let my_number = self.my_number_or_zero(&caller);
             self.account_number_map.insert(caller, my_number + value);
